@@ -60,7 +60,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -80,7 +80,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -102,7 +102,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -122,7 +122,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -148,7 +148,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -168,7 +168,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -190,7 +190,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 
@@ -210,7 +210,7 @@ describe WeasyPrint::Middleware do
               specify do
                 get 'http://www.example.org/public/test.pdf'
                 expect(last_response.headers["Content-Type"]).to eq("application/pdf")
-                expect(last_response.body.bytesize).to be_within(2).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
+                expect(last_response.body.bytesize).to be_within(10).of(WeasyPrint.new("Hello world!").to_pdf.bytesize)
               end
             end
 

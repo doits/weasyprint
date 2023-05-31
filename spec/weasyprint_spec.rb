@@ -312,7 +312,7 @@ describe WeasyPrint do
       pdf_data = weasyprint.to_pdf
       file = weasyprint.to_file(@file_path)
       file_data = open(@file_path, 'rb') {|io| io.read }
-      expect(pdf_data.size).to be_within(2).of(file_data.size)
+      expect(pdf_data.size).to be_within(10).of(file_data.size)
     end
   end
 

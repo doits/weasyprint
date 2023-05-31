@@ -27,7 +27,7 @@ class WeasyPrint
     @options = WeasyPrint.configuration.default_options.merge(options)
     @options = normalize_options(@options)
 
-    raise NoExecutableError.new unless File.exists?(WeasyPrint.configuration.weasyprint)
+    raise NoExecutableError.new unless File.exist?(WeasyPrint.configuration.weasyprint)
   end
 
   def command(path = nil)
@@ -68,7 +68,7 @@ class WeasyPrint
     result = File.read(path) if path
 
     # $? is thread safe per http://stackoverflow.com/questions/2164887/thread-safe-external-process-in-ruby-plus-checking-exitstatus
-    raise "command failed (exitstatus=#{$?.exitstatus}): #{invoke}" if result.to_s.strip.empty? or !successful?($?)
+    raise("command failed (exitstatus=#{$?.exitstatus}): #{invoke}") if !result || result.bytesize < 100 || !successful?($?)
     return result
   end
 

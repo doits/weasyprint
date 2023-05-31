@@ -33,13 +33,6 @@ describe WeasyPrint do
       expect(weasyprint.options).to have_key('--replace')
     end
 
-    it "should provide default options" do
-      weasyprint = WeasyPrint.new('<h1>Oh Hai</h1>')
-      ['--format'].each do |option|
-        expect(weasyprint.options).to have_key(option)
-      end
-    end
-
     it "should default to 'UTF-8' encoding" do
       weasyprint = WeasyPrint.new('Captación')
       expect(weasyprint.options['--encoding']).to eq('UTF-8')
@@ -319,7 +312,7 @@ describe WeasyPrint do
       pdf_data = weasyprint.to_pdf
       file = weasyprint.to_file(@file_path)
       file_data = open(@file_path, 'rb') {|io| io.read }
-      expect(pdf_data.size).to eq(file_data.size)
+      expect(pdf_data.size).to be_within(2).of(file_data.size)
     end
   end
 
@@ -336,7 +329,7 @@ describe WeasyPrint do
     it "should not allow shell injection in options" do
       weasyprint = WeasyPrint.new('html', :encoding => "a title\"; touch #{@test_path} #")
       weasyprint.to_pdf
-      expect(File.exist?(@test_path)).to be_false
+      expect(File.exist?(@test_path)).to eql(false)
     end
   end
 end

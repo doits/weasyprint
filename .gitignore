@@ -20,5 +20,7 @@ pkg
 
 ## PROJECT::SPECIFIC
 .bundle
+.ruby-version
+Gemfile.lock
 spec/custom_weasyprint_path.rb
 spec/test_save.pdf

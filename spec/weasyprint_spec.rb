@@ -46,7 +46,9 @@ describe WeasyPrint do
 
   context 'command' do
     # it "should contstruct the correct command" do
-    #   weasyprint = WeasyPrint.new('html', :page_size => 'Letter', :toc_l1_font_size => 12, :replace => {'foo' => 'bar'})
+    #   weasyprint =
+    #     WeasyPrint.new('html', :page_size => 'Letter', :toc_l1_font_size => 12, :replace => {'foo' => 'bar'})
+    #
     #   command = weasyprint.command
     #   expect(command).to include "wkhtmltopdf"
     #   expect(command).to include "--page-size Letter"
@@ -143,7 +145,8 @@ describe WeasyPrint do
     #   }
     #   weasyprint = WeasyPrint.new(body)
     #   command = weasyprint.command
-    #   expect(command).to include "--cookie rails_session rails_session_value --cookie cookie_variable cookie_variable_value"
+    #   expect(command)
+    #     .to include "--cookie rails_session rails_session_value --cookie cookie_variable cookie_variable_value"
     # end
 
     # it "should detect disable_smart_shrinking meta tag" do
@@ -282,7 +285,8 @@ describe WeasyPrint do
     end
 
     it 'should generate PDF if there are missing assets' do
-      weasyprint = WeasyPrint.new("<html><body><img alt='' src='http://example.com/surely-it-doesnt-exist.gif' /></body></html>")
+      weasyprint =
+        WeasyPrint.new("<html><body><img alt='' src='http://example.com/surely-it-doesnt-exist.gif' /></body></html>")
       pdf = weasyprint.to_pdf
       expect(pdf[0...4]).to eq('%PDF') # PDF Signature at the beginning
     end
@@ -309,9 +313,9 @@ describe WeasyPrint do
       file_path = File.join(SPEC_ROOT, 'fixtures', 'example.html')
       weasyprint = WeasyPrint.new(File.new(file_path))
       pdf_data = weasyprint.to_pdf
-      file = weasyprint.to_file(@file_path)
-      file_data = open(@file_path, 'rb', &:read)
-      expect(pdf_data.size).to be_within(10).of(file_data.size)
+      weasyprint.to_file(@file_path)
+      file_size = File.size(@file_path)
+      expect(pdf_data.size).to be_within(10).of(file_size)
     end
   end
 

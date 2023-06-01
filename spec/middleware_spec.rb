@@ -315,21 +315,21 @@ describe WeasyPrint::Middleware do
     end
 
     it 'should correctly parse relative url with single quotes' do
-      @body = %(<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>)
+      @body = %(<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>) # rubocop:disable Layout/LineLength
       body = @pdf.send :translate_paths, @body, @env
-      expect(body).to eq("<html><head><link href='http://example.com/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.com/test.png\" /></body></html>")
+      expect(body).to eq("<html><head><link href='http://example.com/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.com/test.png\" /></body></html>") # rubocop:disable Layout/LineLength
     end
 
     it 'should correctly parse relative url with double quotes' do
       @body = %(<link href="/stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />)
       body = @pdf.send :translate_paths, @body, @env
-      expect(body).to eq('<link href="http://example.com/stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />')
+      expect(body).to eq('<link href="http://example.com/stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />') # rubocop:disable Layout/LineLength
     end
 
     it 'should correctly parse relative url with double quotes' do
       @body = %(<link href='//fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>)
       body = @pdf.send :translate_paths, @body, @env
-      expect(body).to eq("<link href='//fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>")
+      expect(body).to eq("<link href='//fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>") # rubocop:disable Layout/LineLength
     end
 
     it 'should return the body even if there are no valid substitutions found' do
@@ -349,9 +349,9 @@ describe WeasyPrint::Middleware do
     end
 
     it 'should add the root_url' do
-      @body = %(<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>)
+      @body = %(<html><head><link href='/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src="/test.png" /></body></html>) # rubocop:disable Layout/LineLength
       body = @pdf.send :translate_paths, @body, @env
-      expect(body).to eq("<html><head><link href='http://example.net/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.net/test.png\" /></body></html>")
+      expect(body).to eq("<html><head><link href='http://example.net/stylesheets/application.css' media='screen' rel='stylesheet' type='text/css' /></head><body><img alt='test' src=\"http://example.net/test.png\" /></body></html>") # rubocop:disable Layout/LineLength
     end
 
     after do

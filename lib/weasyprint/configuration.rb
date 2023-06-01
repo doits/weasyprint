@@ -26,10 +26,6 @@ class WeasyPrint
     end
   end
 
-  class << self
-    attr_accessor :configuration
-  end
-
   # Configure WeasyPrint someplace sensible,
   # like config/initializers/weasyprint.rb
   #

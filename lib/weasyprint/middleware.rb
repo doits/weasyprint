@@ -13,7 +13,7 @@ class WeasyPrint
       @render_pdf = false
       @caching    = @conditions.delete(:caching) { false }
 
-      set_request_to_render_as_pdf(env) if render_as_pdf?
+      request_to_render_as_pdf(env) if render_as_pdf?
       status, headers, response = @app.call(env)
 
       if rendering_pdf? && headers['content-type'] =~ %r{text/html|application/xhtml\+xml}
@@ -64,29 +64,27 @@ class WeasyPrint
       if request_path_is_pdf && @conditions[:only]
         rules = [@conditions[:only]].flatten
         rules.any? do |pattern|
-          if pattern.is_a?(Regexp)
-            @request.path =~ pattern
-          else
-            @request.path[0, pattern.length] == pattern
-          end
+          test_condition(pattern, @request.path)
         end
       elsif request_path_is_pdf && @conditions[:except]
         rules = [@conditions[:except]].flatten
-        rules.map do |pattern|
-          if pattern.is_a?(Regexp)
-            return false if @request.path&.match?(pattern)
-          elsif @request.path[0, pattern.length] == pattern
-            return false
-          end
+        rules.none? do |pattern|
+          test_condition(pattern, @request.path)
         end
-
-        true
       else
         request_path_is_pdf
       end
     end
 
-    def set_request_to_render_as_pdf(env)
+    def test_condition(pattern, path)
+      if pattern.is_a?(Regexp)
+        path =~ pattern
+      else
+        path[0, pattern.length] == pattern
+      end
+    end
+
+    def request_to_render_as_pdf(env)
       @render_pdf = true
 
       path = @request.path.sub(/\.pdf$/, '')

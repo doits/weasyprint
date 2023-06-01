@@ -19,13 +19,14 @@ class WeasyPrint
     end
   end
 
-  attr_accessor :source, :stylesheets
+  attr_accessor :source, :styles, :stylesheets
   attr_reader :options
 
   def initialize(url_file_or_html, options = {})
     @source = Source.new(url_file_or_html)
 
     @stylesheets = []
+    @styles = []
 
     @options = WeasyPrint.configuration.default_options.merge(options)
     @options = normalize_options(@options)
@@ -88,19 +89,17 @@ class WeasyPrint
 
   REPEATABLE_OPTIONS = %w[].freeze
 
-  def style_tag_for(stylesheet)
-    "<style>#{File.read(stylesheet)}</style>"
-  end
-
   def append_stylesheets
     raise ImproperSourceError, 'Stylesheets may only be added to an HTML source' if stylesheets.any? && !@source.html?
 
-    stylesheets.each do |stylesheet|
+    custom_styles = stylesheets.map { |stylesheet| File.read(stylesheet) }
+
+    (custom_styles + styles).each do |style|
       @source =
         if @source.to_s.include?('</head>')
-          Source.new(@source.to_s.gsub(%r{(</head>)}) { |s| style_tag_for(stylesheet) + s })
+          Source.new(@source.to_s.gsub(%r{(</head>)}) { |s| "<style>#{style}</style>" + s })
         else
-          Source.new(style_tag_for(stylesheet) + @source.to_s)
+          Source.new("<style>#{style}</style>" + @source.to_s)
         end
     end
   end

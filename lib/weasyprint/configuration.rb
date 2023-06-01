@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WeasyPrint
   class Configuration
     attr_accessor :meta_tag_prefix, :default_options, :root_url
@@ -22,10 +24,6 @@ class WeasyPrint
     def verbose?
       @verbose
     end
-  end
-
-  class << self
-    attr_accessor :configuration
   end
 
   # Configure WeasyPrint someplace sensible,

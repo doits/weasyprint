@@ -1,7 +1,7 @@
+# frozen_string_literal: true
+
 class WeasyPrint
-
   class Middleware
-
     def initialize(app, options = {}, conditions = {})
       @app        = app
       @options    = options
@@ -13,17 +13,21 @@ class WeasyPrint
       @render_pdf = false
       @caching    = @conditions.delete(:caching) { false }
 
-      set_request_to_render_as_pdf(env) if render_as_pdf?
+      request_to_render_as_pdf(env) if render_as_pdf?
       status, headers, response = @app.call(env)
 
-      if rendering_pdf? && headers['content-type'] =~ /text\/html|application\/xhtml\+xml/
+      if rendering_pdf? && headers['content-type'] =~ %r{text/html|application/xhtml\+xml}
         body = response.respond_to?(:body) ? response.body : response.join
         body = body.join if body.is_a?(Array)
         body = WeasyPrint.new(translate_paths(body, env), @options).to_pdf
         response = [body]
 
         if headers['weasyprint-save-pdf']
-          File.open(headers['weasyprint-save-pdf'], 'wb') { |file| file.write(body) } rescue nil
+          begin
+            File.binwrite(headers['weasyprint-save-pdf'], body)
+          rescue StandardError
+            nil
+          end
           headers.delete('weasyprint-save-pdf')
         end
 
@@ -47,7 +51,7 @@ class WeasyPrint
       # Host with protocol
       root = WeasyPrint.configuration.root_url || "#{env['rack.url_scheme']}://#{env['HTTP_HOST']}/"
 
-      body.gsub(/(href|src)=(['"])\/([^\/]([^\"']*|[^"']*))['"]/, '\1=\2' + root + '\3\2')
+      body.gsub(%r{(href|src)=(['"])/([^/]([^"']*|[^"']*))['"]}, '\1=\2' + root + '\3\2')
     end
 
     def rendering_pdf?
@@ -55,37 +59,35 @@ class WeasyPrint
     end
 
     def render_as_pdf?
-      request_path_is_pdf = @request.path.match(%r{\.pdf$})
+      request_path_is_pdf = @request.path.match(/\.pdf$/)
 
       if request_path_is_pdf && @conditions[:only]
         rules = [@conditions[:only]].flatten
         rules.any? do |pattern|
-          if pattern.is_a?(Regexp)
-            @request.path =~ pattern
-          else
-            @request.path[0, pattern.length] == pattern
-          end
+          test_condition(pattern, @request.path)
         end
       elsif request_path_is_pdf && @conditions[:except]
         rules = [@conditions[:except]].flatten
-        rules.map do |pattern|
-          if pattern.is_a?(Regexp)
-            return false if @request.path =~ pattern
-          else
-            return false if @request.path[0, pattern.length] == pattern
-          end
+        rules.none? do |pattern|
+          test_condition(pattern, @request.path)
         end
-
-        return true
       else
         request_path_is_pdf
       end
     end
 
-    def set_request_to_render_as_pdf(env)
+    def test_condition(pattern, path)
+      if pattern.is_a?(Regexp)
+        path =~ pattern
+      else
+        path[0, pattern.length] == pattern
+      end
+    end
+
+    def request_to_render_as_pdf(env)
       @render_pdf = true
 
-      path = @request.path.sub(%r{\.pdf$}, '')
+      path = @request.path.sub(/\.pdf$/, '')
       path = path.sub(@request.script_name, '')
 
       %w[PATH_INFO REQUEST_URI].each { |e| env[e] = path }
@@ -97,6 +99,5 @@ class WeasyPrint
     def concat(accepts, type)
       (accepts || '').split(',').unshift(type).compact.join(',')
     end
-
   end
 end

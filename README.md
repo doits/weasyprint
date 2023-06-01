@@ -21,7 +21,12 @@ See [weasyprint docs](https://doc.courtbouillon.org/weasyprint/stable/)
 # WeasyPrint.new takes the HTML and any options for weasyprint
 # run `weasyprint --help` for a full list of options
 kit = WeasyPrint.new(html)
+
+# Use styles from a file
 kit.stylesheets << '/path/to/css/file'
+
+# Use styles from a string
+kit.styles << 'h1 { font-weight: bold; }'
 
 # Get an inline PDF
 pdf = kit.to_pdf

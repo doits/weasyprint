@@ -8,7 +8,7 @@ class WeasyPrint
   class NoExecutableError < StandardError
     def initialize
       msg  = "No weasyprint executable found at #{WeasyPrint.configuration.weasyprint}\n"
-      msg << '>> Please install weasyprint - http://weasyprint.org/docs/install/'
+      msg << '>> Please install weasyprint - https://doc.courtbouillon.org/weasyprint/stable/'
       super(msg)
     end
   end

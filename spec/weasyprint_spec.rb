@@ -1,35 +1,35 @@
-#encoding: UTF-8
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe WeasyPrint do
-
-  context "initialization" do
-    it "should accept HTML as the source" do
+  context 'initialization' do
+    it 'should accept HTML as the source' do
       weasyprint = WeasyPrint.new('<h1>Oh Hai</h1>')
       expect(weasyprint.source).to be_html
       expect(weasyprint.source.to_s).to eq('<h1>Oh Hai</h1>')
     end
 
-    it "should accept a URL as the source" do
+    it 'should accept a URL as the source' do
       weasyprint = WeasyPrint.new('http://google.com')
       expect(weasyprint.source).to be_url
       expect(weasyprint.source.to_s).to eq('http://google.com')
     end
 
-    it "should accept a File as the source" do
-      file_path = File.join(SPEC_ROOT,'fixtures','example.html')
+    it 'should accept a File as the source' do
+      file_path = File.join(SPEC_ROOT, 'fixtures', 'example.html')
       weasyprint = WeasyPrint.new(File.new(file_path))
       expect(weasyprint.source).to be_file
       expect(weasyprint.source.to_s).to eq(file_path)
     end
 
-    it "should parse the options into a cmd line friedly format" do
-      weasyprint = WeasyPrint.new('html', :resolution => '300')
+    it 'should parse the options into a cmd line friedly format' do
+      weasyprint = WeasyPrint.new('html', resolution: '300')
       expect(weasyprint.options).to have_key('--resolution')
     end
 
-    it "should parse complex options into a cmd line friedly format" do
-      weasyprint = WeasyPrint.new('html', :replace => {'value' => 'something else'} )
+    it 'should parse complex options into a cmd line friedly format' do
+      weasyprint = WeasyPrint.new('html', replace: { 'value' => 'something else' })
       expect(weasyprint.options).to have_key('--replace')
     end
 
@@ -38,13 +38,13 @@ describe WeasyPrint do
       expect(weasyprint.options['--encoding']).to eq('UTF-8')
     end
 
-    it "should not have any stylesheedt by default" do
+    it 'should not have any stylesheedt by default' do
       weasyprint = WeasyPrint.new('<h1>Oh Hai</h1>')
       expect(weasyprint.stylesheets).to be_empty
     end
   end
 
-  context "command" do
+  context 'command' do
     # it "should contstruct the correct command" do
     #   weasyprint = WeasyPrint.new('html', :page_size => 'Letter', :toc_l1_font_size => 12, :replace => {'foo' => 'bar'})
     #   command = weasyprint.command
@@ -85,36 +85,36 @@ describe WeasyPrint do
     #   expect(weasyprint.command).not_to include('--disable-smart-shrinking')
     # end
 
-    it "should encapsulate string arguments in quotes" do
-      weasyprint = WeasyPrint.new('html', :header_center => "foo [page]")
-      expect(weasyprint.command).to include "--header-center foo\\ \\[page\\]"
+    it 'should encapsulate string arguments in quotes' do
+      weasyprint = WeasyPrint.new('html', header_center: 'foo [page]')
+      expect(weasyprint.command).to include '--header-center foo\\ \\[page\\]'
     end
 
-    it "should sanitize string arguments" do
-      weasyprint = WeasyPrint.new('html', :header_center => "$(ls)")
-      expect(weasyprint.command).to include "--header-center \\$\\(ls\\)"
+    it 'should sanitize string arguments' do
+      weasyprint = WeasyPrint.new('html', header_center: '$(ls)')
+      expect(weasyprint.command).to include '--header-center \\$\\(ls\\)'
     end
 
-    it "read the source from stdin if it is html" do
+    it 'read the source from stdin if it is html' do
       weasyprint = WeasyPrint.new('html')
-      expect(weasyprint.command).to match /- -$/
+      expect(weasyprint.command).to match(/- -$/)
     end
 
-    it "specify the URL to the source if it is a url" do
+    it 'specify the URL to the source if it is a url' do
       weasyprint = WeasyPrint.new('http://google.com')
-      expect(weasyprint.command).to match /http:\/\/google.com -$/
+      expect(weasyprint.command).to match(%r{http://google.com -$})
     end
 
-    it "should specify the path to the source if it is a file" do
-      file_path = File.join(SPEC_ROOT,'fixtures','example.html')
+    it 'should specify the path to the source if it is a file' do
+      file_path = File.join(SPEC_ROOT, 'fixtures', 'example.html')
       weasyprint = WeasyPrint.new(File.new(file_path))
-      expect(weasyprint.command).to match /#{file_path} -$/
+      expect(weasyprint.command).to match(/#{file_path} -$/)
     end
 
-    it "should specify the path for the ouput if a path is given" do
-      file_path = "/path/to/output.pdf"
-      weasyprint = WeasyPrint.new("html")
-      expect(weasyprint.command(file_path)).to match /#{file_path}$/
+    it 'should specify the path for the ouput if a path is given' do
+      file_path = '/path/to/output.pdf'
+      weasyprint = WeasyPrint.new('html')
+      expect(weasyprint.command(file_path)).to match(/#{file_path}$/)
     end
 
     # it "should detect special weasyprint meta tags" do
@@ -228,106 +228,105 @@ describe WeasyPrint do
     #     config.verbose = false
     #   end
     # end
-
   end
 
-  context "#to_pdf" do
-    it "should generate a PDF of the HTML" do
+  context '#to_pdf' do
+    it 'should generate a PDF of the HTML' do
       weasyprint = WeasyPrint.new('html')
       pdf = weasyprint.to_pdf
-      expect(pdf[0...4]).to eq("%PDF") # PDF Signature at beginning of file
+      expect(pdf[0...4]).to eq('%PDF') # PDF Signature at beginning of file
     end
 
-    it "should have the stylesheet added to the head if it has one" do
-      weasyprint = WeasyPrint.new("<html><head></head><body>Hai!</body></html>")
-      css = File.join(SPEC_ROOT,'fixtures','example.css')
+    it 'should have the stylesheet added to the head if it has one' do
+      weasyprint = WeasyPrint.new('<html><head></head><body>Hai!</body></html>')
+      css = File.join(SPEC_ROOT, 'fixtures', 'example.css')
       weasyprint.stylesheets << css
       weasyprint.to_pdf
       expect(weasyprint.source.to_s).to include("<style>#{File.read(css)}</style>")
     end
 
     it "should prepend style tags if the HTML doesn't have a head tag" do
-      weasyprint = WeasyPrint.new("<html><body>Hai!</body></html>")
-      css = File.join(SPEC_ROOT,'fixtures','example.css')
+      weasyprint = WeasyPrint.new('<html><body>Hai!</body></html>')
+      css = File.join(SPEC_ROOT, 'fixtures', 'example.css')
       weasyprint.stylesheets << css
       weasyprint.to_pdf
       expect(weasyprint.source.to_s).to include("<style>#{File.read(css)}</style><html>")
     end
 
-    it "should throw an error if the source is not html and stylesheets have been added" do
+    it 'should throw an error if the source is not html and stylesheets have been added' do
       weasyprint = WeasyPrint.new('http://google.com')
-      css = File.join(SPEC_ROOT,'fixtures','example.css')
+      css = File.join(SPEC_ROOT, 'fixtures', 'example.css')
       weasyprint.stylesheets << css
       expect { weasyprint.to_pdf }.to raise_error(WeasyPrint::ImproperSourceError)
     end
 
-    it "should be able to deal with ActiveSupport::SafeBuffer" do
-      weasyprint = WeasyPrint.new(ActiveSupport::SafeBuffer.new "<html><head></head><body>Hai!</body></html>")
-      css = File.join(SPEC_ROOT,'fixtures','example.css')
+    it 'should be able to deal with ActiveSupport::SafeBuffer' do
+      weasyprint = WeasyPrint.new(ActiveSupport::SafeBuffer.new('<html><head></head><body>Hai!</body></html>'))
+      css = File.join(SPEC_ROOT, 'fixtures', 'example.css')
       weasyprint.stylesheets << css
       weasyprint.to_pdf
       expect(weasyprint.source.to_s).to include("<style>#{File.read(css)}</style></head>")
     end
 
-    it "should escape \\X in stylesheets" do
-      weasyprint = WeasyPrint.new("<html><head></head><body>Hai!</body></html>")
-      css = File.join(SPEC_ROOT,'fixtures','example_with_hex_symbol.css')
+    it 'should escape \\X in stylesheets' do
+      weasyprint = WeasyPrint.new('<html><head></head><body>Hai!</body></html>')
+      css = File.join(SPEC_ROOT, 'fixtures', 'example_with_hex_symbol.css')
       weasyprint.stylesheets << css
       weasyprint.to_pdf
       expect(weasyprint.source.to_s).to include("<style>#{File.read(css)}</style></head>")
     end
 
-    it "should throw an error if it is unable to connect" do
-      weasyprint = WeasyPrint.new("http://google.com/this-should-not-be-found/404.html")
-      expect { weasyprint.to_pdf }.to raise_error /exitstatus=1/
+    it 'should throw an error if it is unable to connect' do
+      weasyprint = WeasyPrint.new('http://google.com/this-should-not-be-found/404.html')
+      expect { weasyprint.to_pdf }.to raise_error(/exitstatus=1/)
     end
 
-    it "should generate PDF if there are missing assets" do
+    it 'should generate PDF if there are missing assets' do
       weasyprint = WeasyPrint.new("<html><body><img alt='' src='http://example.com/surely-it-doesnt-exist.gif' /></body></html>")
       pdf = weasyprint.to_pdf
-      expect(pdf[0...4]).to eq("%PDF") # PDF Signature at the beginning
+      expect(pdf[0...4]).to eq('%PDF') # PDF Signature at the beginning
     end
   end
 
-  context "#to_file" do
+  context '#to_file' do
     before do
-      @file_path = File.join(SPEC_ROOT,'fixtures','test.pdf')
-      File.delete(@file_path) if File.exist?(@file_path)
+      @file_path = File.join(SPEC_ROOT, 'fixtures', 'test.pdf')
+      FileUtils.rm_f(@file_path)
     end
 
     after do
       File.delete(@file_path)
     end
 
-    it "should create a file with the PDF as content" do
+    it 'should create a file with the PDF as content' do
       weasyprint = WeasyPrint.new('html')
       file = weasyprint.to_file(@file_path)
       expect(file).to be_instance_of(File)
-      expect(File.read(file.path)[0...4]).to eq("%PDF") # PDF Signature at beginning of file
+      expect(File.read(file.path)[0...4]).to eq('%PDF') # PDF Signature at beginning of file
     end
 
-    it "should not truncate data (in Ruby 1.8.6)" do
-      file_path = File.join(SPEC_ROOT,'fixtures','example.html')
+    it 'should not truncate data (in Ruby 1.8.6)' do
+      file_path = File.join(SPEC_ROOT, 'fixtures', 'example.html')
       weasyprint = WeasyPrint.new(File.new(file_path))
       pdf_data = weasyprint.to_pdf
       file = weasyprint.to_file(@file_path)
-      file_data = open(@file_path, 'rb') {|io| io.read }
+      file_data = open(@file_path, 'rb', &:read)
       expect(pdf_data.size).to be_within(10).of(file_data.size)
     end
   end
 
-  context "security" do
+  context 'security' do
     before do
-      @test_path = File.join(SPEC_ROOT,'fixtures','security-oops')
-      File.delete(@test_path) if File.exist?(@test_path)
+      @test_path = File.join(SPEC_ROOT, 'fixtures', 'security-oops')
+      FileUtils.rm_f(@test_path)
     end
 
     after do
-      File.delete(@test_path) if File.exist?(@test_path)
+      FileUtils.rm_f(@test_path)
     end
 
-    it "should not allow shell injection in options" do
-      weasyprint = WeasyPrint.new('html', :encoding => "a title\"; touch #{@test_path} #")
+    it 'should not allow shell injection in options' do
+      weasyprint = WeasyPrint.new('html', encoding: "a title\"; touch #{@test_path} #")
       weasyprint.to_pdf
       expect(File.exist?(@test_path)).to eql(false)
     end

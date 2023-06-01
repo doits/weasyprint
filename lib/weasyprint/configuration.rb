@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WeasyPrint
   class Configuration
     attr_accessor :meta_tag_prefix, :default_options, :root_url

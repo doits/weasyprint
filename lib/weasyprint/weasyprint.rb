@@ -1,11 +1,14 @@
+# frozen_string_literal: true
+
+require 'English'
+
 require 'shellwords'
 
 class WeasyPrint
-
   class NoExecutableError < StandardError
     def initialize
       msg  = "No weasyprint executable found at #{WeasyPrint.configuration.weasyprint}\n"
-      msg << ">> Please install weasyprint - http://weasyprint.org/docs/install/"
+      msg << '>> Please install weasyprint - http://weasyprint.org/docs/install/'
       super(msg)
     end
   end
@@ -27,18 +30,18 @@ class WeasyPrint
     @options = WeasyPrint.configuration.default_options.merge(options)
     @options = normalize_options(@options)
 
-    raise NoExecutableError.new unless File.exist?(WeasyPrint.configuration.weasyprint)
+    raise NoExecutableError unless File.exist?(WeasyPrint.configuration.weasyprint)
   end
 
   def command(path = nil)
     args = [executable]
     args += @options.to_a.flatten.compact
 
-    if @source.html?
-      args << '-' # Get HTML from stdin
-    else
-      args << @source.to_s
-    end
+    args << if @source.html?
+              '-' # Get HTML from stdin
+            else
+              @source.to_s
+            end
 
     args << (path || '-') # Write to file or stdout
 
@@ -47,7 +50,8 @@ class WeasyPrint
 
   def executable
     default = WeasyPrint.configuration.weasyprint
-    return default if default !~ /^\// # its not a path, so nothing we can do
+    return default unless %r{^/}.match?(default) # its not a path, so nothing we can do
+
     if File.exist?(default)
       default
     else
@@ -55,12 +59,12 @@ class WeasyPrint
     end
   end
 
-  def to_pdf(path=nil)
+  def to_pdf(path = nil)
     append_stylesheets
 
     invoke = command(path)
 
-    result = IO.popen(invoke, "wb+") do |pdf|
+    result = IO.popen(invoke, 'wb+') do |pdf|
       pdf.puts(@source.to_s) if @source.html?
       pdf.close_write
       pdf.gets(nil)
@@ -68,87 +72,89 @@ class WeasyPrint
     result = File.read(path) if path
 
     # $? is thread safe per http://stackoverflow.com/questions/2164887/thread-safe-external-process-in-ruby-plus-checking-exitstatus
-    raise("command failed (exitstatus=#{$?.exitstatus}): #{invoke}") if !result || result.bytesize < 100 || !successful?($?)
-    return result
+    if !result || result.bytesize < 100 || !successful?($CHILD_STATUS)
+      raise("command failed (exitstatus=#{$CHILD_STATUS.exitstatus}): #{invoke}")
+    end
+
+    result
   end
 
   def to_file(path)
-    self.to_pdf(path)
+    to_pdf(path)
     File.new(path)
   end
 
   protected
 
-    REPEATABLE_OPTIONS = %w[]
+  REPEATABLE_OPTIONS = %w[].freeze
 
-    def style_tag_for(stylesheet)
-      "<style>#{File.read(stylesheet)}</style>"
-    end
+  def style_tag_for(stylesheet)
+    "<style>#{File.read(stylesheet)}</style>"
+  end
 
-    def append_stylesheets
-      raise ImproperSourceError.new('Stylesheets may only be added to an HTML source') if stylesheets.any? && !@source.html?
+  def append_stylesheets
+    raise ImproperSourceError, 'Stylesheets may only be added to an HTML source' if stylesheets.any? && !@source.html?
 
-      stylesheets.each do |stylesheet|
-        if @source.to_s.match(/<\/head>/)
-          @source = Source.new(@source.to_s.gsub(/(<\/head>)/) {|s| style_tag_for(stylesheet) + s })
-        else
-          @source.to_s.insert(0, style_tag_for(stylesheet))
-        end
-      end
-    end
-
-    def normalize_options(options)
-      normalized_options = {}
-
-      options.each do |key, value|
-        next if !value
-
-        # The actual option for weasyprint
-        normalized_key = "--#{normalize_arg key}"
-
-        # If the option is repeatable, attempt to normalize all values
-        if REPEATABLE_OPTIONS.include? normalized_key
-          normalize_repeatable_value(value) do |normalized_key_piece, normalized_value|
-            normalized_options[[normalized_key, normalized_key_piece]] = normalized_value
-          end
-        else # Otherwise, just normalize it like usual
-          normalized_options[normalized_key] = normalize_value(value)
-        end
-      end
-
-      normalized_options
-    end
-
-    def normalize_arg(arg)
-      arg.to_s.downcase.gsub(/[^a-z0-9]/,'-')
-    end
-
-    def normalize_value(value)
-      case value
-      when TrueClass, 'true' #ie, ==true, see http://www.ruby-doc.org/core-1.9.3/TrueClass.html
-        nil
-      when Hash
-        value.to_a.flatten.collect{|x| normalize_value(x)}.compact
-      when Array
-        value.flatten.collect{|x| x.to_s}
+    stylesheets.each do |stylesheet|
+      if @source.to_s.include?('</head>')
+        @source = Source.new(@source.to_s.gsub(%r{(</head>)}) { |s| style_tag_for(stylesheet) + s })
       else
-        value.to_s
+        @source.to_s.insert(0, style_tag_for(stylesheet))
       end
     end
+  end
 
-    def normalize_repeatable_value(value)
-      case value
-      when Hash, Array
-        value.each do |(key, value)|
-          yield [normalize_value(key), normalize_value(value)]
+  def normalize_options(options)
+    normalized_options = {}
+
+    options.each do |key, value|
+      next unless value
+
+      # The actual option for weasyprint
+      normalized_key = "--#{normalize_arg key}"
+
+      # If the option is repeatable, attempt to normalize all values
+      if REPEATABLE_OPTIONS.include? normalized_key
+        normalize_repeatable_value(value) do |normalized_key_piece, normalized_value|
+          normalized_options[[normalized_key, normalized_key_piece]] = normalized_value
         end
-      else
-        [normalize_value(value), '']
+      else # Otherwise, just normalize it like usual
+        normalized_options[normalized_key] = normalize_value(value)
       end
     end
 
-    def successful?(status)
-      status.success?
-    end
+    normalized_options
+  end
 
+  def normalize_arg(arg)
+    arg.to_s.downcase.gsub(/[^a-z0-9]/, '-')
+  end
+
+  def normalize_value(value)
+    case value
+    when TrueClass, 'true' # ie, ==true, see http://www.ruby-doc.org/core-1.9.3/TrueClass.html
+      nil
+    when Hash
+      value.to_a.flatten.filter_map { |x| normalize_value(x) }
+    when Array
+      value.flatten.collect(&:to_s)
+    else
+      value.to_s
+    end
+  end
+
+  def normalize_repeatable_value(value)
+    case value
+    when Hash, Array
+      value.each do |(key, value)|
+        yield [normalize_value(key), normalize_value(value)]
+      end
+    else
+      [normalize_value(value), '']
+    end
+  end
+
+  def successful?(status)
+    status.success?
+  end
 end

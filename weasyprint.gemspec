@@ -26,4 +26,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<rake>, ["~> 13.0"])
   s.add_development_dependency(%q<rdoc>, ["~> 6.0"])
   s.add_development_dependency(%q<rspec>, ["~> 3.0"])
+  s.add_development_dependency(%q<rubocop>, [">= 1.51"])
+  s.add_development_dependency(%q<rubocop-performance>, [">= 1.18"])
 end

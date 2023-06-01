@@ -13,6 +13,8 @@ require 'active_support'
 
 require 'custom_wkhtmltopdf_path' if File.exist?(File.join(SPEC_ROOT, 'custom_wkhtmltopdf_path.rb'))
 
+RSpec::Matchers.define_negated_matcher :not_change, :change
+
 RSpec.configure do |_config|
   include Rack::Test::Methods
 end

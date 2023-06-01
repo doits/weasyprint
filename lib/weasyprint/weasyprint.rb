@@ -92,11 +92,9 @@ class WeasyPrint
   def append_stylesheets
     raise ImproperSourceError, 'Stylesheets may only be added to an HTML source' if stylesheets.any? && !@source.html?
 
-    stylesheets.each do |stylesheet|
-      styles << File.read(stylesheet)
-    end
+    custom_styles = stylesheets.map { |stylesheet| File.read(stylesheet) }
 
-    styles.each do |style|
+    (custom_styles + styles).each do |style|
       @source =
         if @source.to_s.include?('</head>')
           Source.new(@source.to_s.gsub(%r{(</head>)}) { |s| "<style>#{style}</style>" + s })

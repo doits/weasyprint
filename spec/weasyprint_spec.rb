@@ -256,6 +256,17 @@ describe WeasyPrint do
       expect(weasyprint.source.to_s).to include("<style>#{css}</style>")
     end
 
+    it 'should not mutate styles or stylesheets' do
+      weasyprint = WeasyPrint.new('<html><head></head><body>Hai!</body></html>')
+
+      weasyprint.stylesheets << File.join(SPEC_ROOT, 'fixtures', 'example.css')
+      weasyprint.styles << File.read(File.join(SPEC_ROOT, 'fixtures', 'example.css'))
+
+      expect { weasyprint.to_pdf }
+        .to not_change { weasyprint.styles }
+        .and not_change { weasyprint.stylesheets }
+    end
+
     it "should prepend style tags if the HTML doesn't have a head tag" do
       weasyprint = WeasyPrint.new('<html><body>Hai!</body></html>')
       css = File.join(SPEC_ROOT, 'fixtures', 'example.css')
